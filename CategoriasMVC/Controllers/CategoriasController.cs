@@ -13,6 +13,8 @@ namespace CategoriasMVC.Controllers
             _categoriaService = categoriaService;
         }
 
+        // get all categorias
+        [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoriaViewModel>>> Index()
         {
             var result = await _categoriaService.GetCategorias();
@@ -21,6 +23,76 @@ namespace CategoriasMVC.Controllers
                 return View("error");
 
             return View(result);
+        }
+
+        // criar nova categoria
+        [HttpGet]
+        public IActionResult CriarNovaCategoria()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<ActionResult<CategoriaViewModel>> CriarNovaCategoria(CategoriaViewModel categoriaVM)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _categoriaService.CriaCategoria(categoriaVM);
+
+                if (result != null)
+                {
+                    return RedirectToAction(nameof(Index));
+                }
+                
+            }
+            ViewBag.Erro = "Erro ao criar categoria";
+                return View(categoriaVM);
+        }
+
+        // alterar categoria
+        [HttpGet]
+        public async Task<IActionResult> AtualizarCategoria(int id)
+        {
+            var result = await _categoriaService.GetCategoriaPorId(id);
+
+            if (result is null)
+                return View("Error");
+
+            return View(result);
+        }
+        [HttpPost]
+        public async Task<ActionResult<CategoriaViewModel>> AtualizarCategoria(int id, CategoriaViewModel categoriaVM)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await _categoriaService.AtualizaCategoria(id, categoriaVM);
+
+                if (result)
+                    return RedirectToAction(nameof(Index));
+            }
+            ViewBag.Erro = "Erro ao atualizar categoria";
+            return View(categoriaVM);
+        }
+
+        // deletar categoria
+        [HttpGet]
+        public async Task<ActionResult> DeletarCategoria(int id)
+        {
+            var result = await _categoriaService.GetCategoriaPorId(id);
+
+            if (result is null)
+                return View("Error");
+
+            return View(result);
+        }
+        [HttpPost,  ActionName("DeletarCategoria")]
+        public async Task<IActionResult> DeletaConfirmado(int id)
+        {
+            var result = await _categoriaService.DeletaCategoria(id);
+
+            if (result)
+                return View("Index");
+
+            return View("Error");
         }
     }
 }
